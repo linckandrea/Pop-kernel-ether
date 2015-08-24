@@ -39,6 +39,7 @@
 #include <linux/slab.h>
 #include <linux/pid_namespace.h>
 #include <linux/security.h>
+#include <linux/ratelimit.h>
 
 #ifdef CONFIG_ANDROID_BINDER_IPC_32BIT
 #define BINDER_IPC_32BIT 1
@@ -686,7 +687,7 @@ static int binder_update_page_range(struct binder_proc *proc, int allocate,
 		goto free_range;
 
 	if (vma == NULL) {
-		pr_err("%d: binder_alloc_buf failed to map pages in userspace, no vma\n",
+		pr_err_ratelimited("%d: binder_alloc_buf failed to map pages in userspace, no vma\n",
 			proc->pid);
 		goto err_no_vma;
 	}
