@@ -48,6 +48,7 @@
 #include <soc/qcom/msm-core.h>
 #include <linux/cpumask.h>
 #include <linux/suspend.h>
+#include <linux/state_notifier.h>
 
 #define CREATE_TRACE_POINTS
 #define TRACE_MSM_THERMAL
@@ -101,6 +102,7 @@ static struct task_struct *thermal_monitor_task;
 static struct completion hotplug_notify_complete;
 static struct completion freq_mitigation_complete;
 static struct completion thermal_monitor_complete;
+static struct notifier_block state_notifier_hook;
 
 static int enabled;
 static int polling_enabled;
@@ -2403,17 +2405,17 @@ static void therm_reset_notify(struct therm_threshold *thresh_data)
 }
 
 #ifdef CONFIG_SMP
-static void __ref do_core_control(long temp)
+static void __ref do_core_control(long temp, bool big_off)
 {
 	int i = 0;
 	int ret = 0;
 
-	if (!core_control_enabled)
+	if (!core_control_enabled && !big_off)
 		return;
 
 	mutex_lock(&core_control_mutex);
 	if (msm_thermal_info.core_control_mask &&
-		temp >= temp_threshold) {
+		(temp >= temp_threshold || big_off)) {
 		for (i = num_possible_cpus(); i > 0; i--) {
 			if (i < 4 && !polling_enabled)
 				continue;
@@ -2421,7 +2423,10 @@ static void __ref do_core_control(long temp)
 				continue;
 			if (cpus_offlined & BIT(i) && !cpu_online(i))
 				continue;
-			pr_info("Set Offline: CPU%d Temp: %ld\n",
+                                if (big_off)
+                                     pr_info("Set Offline: CPU%d BIG off\n", i);
+                                else
+			             pr_info("Set Offline: CPU%d Temp: %ld\n",
 					i, temp);
 			if (cpu_online(i)) {
 				trace_thermal_pre_core_offline(i);
@@ -2433,7 +2438,8 @@ static void __ref do_core_control(long temp)
 					cpumask_test_cpu(i, cpu_online_mask));
 			}
 			cpus_offlined |= BIT(i);
-			break;
+                        if(!big_off)
+			      break;
 		}
 	} else if (msm_thermal_info.core_control_mask && cpus_offlined &&
 		temp <= (temp_threshold - HOTPLUG_HYSTERESIS)) {
@@ -2588,7 +2594,7 @@ static __ref int do_hotplug(void *data)
 	return ret;
 }
 #else
-static void __ref do_core_control(long temp)
+static void __ref do_core_control(long temp,bool big_off)
 {
 	return;
 }
@@ -2972,7 +2978,7 @@ static void check_temp(struct work_struct *work)
 				HOTPLUG_SENSOR_ID, ret);
 			goto reschedule;
 		}
-		do_core_control(temp);
+		do_core_control(temp,false);
 
 		goto reschedule;
 	}
@@ -2983,7 +2989,7 @@ static void check_temp(struct work_struct *work)
 				msm_thermal_info.sensor_id, ret);
 		goto reschedule;
 	}
-	do_core_control(temp);
+	do_core_control(temp,false);
 	do_vdd_mx();
 	do_psm();
 	do_gfx_phase_cond();
@@ -4157,7 +4163,7 @@ cx_node_exit:
 	return ret;
 }
 
-#if 0
+
 /*
  * We will reset the cpu frequencies limits here. The core online/offline
  * status will be carried over to the process stopping the msm_thermal, as
@@ -4184,7 +4190,6 @@ static void __ref disable_msm_thermal(void)
 	update_cluster_freq();
 	put_online_cpus();
 }
-#endif
 
 static void interrupt_mode_init(void)
 {
@@ -4203,6 +4208,21 @@ static void interrupt_mode_init(void)
 		msm_thermal_add_gfx_nodes();
 	}
 }
+
+void msm_thermal_suspend(bool suspend)
+{
+       if (suspend) {
+               disable_msm_thermal();
+               do_core_control(temp_threshold,true);
+               pr_info("suspended\n");
+       } else {
+               queue_delayed_work(system_power_efficient_wq,
+                          &check_temp_work, 0);
+               do_core_control(temp_threshold,false);
+               pr_info("resumed\n");
+       }
+}
+EXPORT_SYMBOL(msm_thermal_suspend);
 
 static int __ref set_enabled(const char *val, const struct kernel_param *kp)
 {
@@ -6004,9 +6024,38 @@ static struct platform_driver msm_thermal_device_driver = {
 	.remove = msm_thermal_dev_exit,
 };
 
+static int state_notifier_call(struct notifier_block *this,
+                               unsigned long event, void *data)
+{
+       switch (event) {
+               case STATE_NOTIFIER_ACTIVE:
+                       msm_thermal_suspend(false);
+                       break;
+               case STATE_NOTIFIER_SUSPEND:
+                       msm_thermal_suspend(true);
+                       break;
+               default:
+                       break;
+       }
+       return 0;
+}
+
 int __init msm_thermal_device_init(void)
 {
-	return platform_driver_register(&msm_thermal_device_driver);
+       int ret = 0;
+
+       state_notifier_hook.notifier_call = state_notifier_call;
+       if (state_register_client(&state_notifier_hook))
+               pr_info("%s: Failed to register fb notifier.\n",
+                       __func__);
+
+       ret = platform_driver_register(&msm_thermal_device_driver);
+       if (ret)
+               pr_info("%s: Failed to register msm_thermal driver.\n",
+                       __func__);
+
+       return ret;
+
 }
 arch_initcall(msm_thermal_device_init);
 
