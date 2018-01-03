@@ -184,6 +184,38 @@ struct cs_dbs_tuners {
 	unsigned int boost_enabled;
 	unsigned int boost_count;
 	unsigned int boost_ceiling;
+	unsigned int input_boost_freq;
+	unsigned int input_boost_duration;
+	unsigned int twostep_threshold;
+	unsigned int min_load;
+	unsigned int twostep_counter;
+	u64 twostep_time;
+};
+
+struct ex_dbs_tuners {
+	unsigned int ignore_nice_load;
+	unsigned int sampling_rate;
+	unsigned int up_threshold;
+	unsigned int down_differential;
+	unsigned int active_floor_freq;
+	unsigned int sampling_down_factor;
+	unsigned int powersave;
+};
+
+struct zz_dbs_tuners {
+	unsigned int ignore_nice_load;
+	unsigned int sampling_rate;
+	unsigned int sampling_down_factor;
+	unsigned int up_threshold;
+	unsigned int down_threshold;
+	unsigned int smooth_up;
+	unsigned int scaling_proportional;
+	unsigned int fast_scaling_up;
+	unsigned int fast_scaling_down;
+	unsigned int afs_threshold1;
+	unsigned int afs_threshold2;
+	unsigned int afs_threshold3;
+	unsigned int afs_threshold4;
 };
 
 /* Common Governor data across policies */
@@ -206,7 +238,7 @@ struct common_dbs_data {
 	void *(*get_cpu_dbs_info_s)(int cpu);
 	void (*gov_dbs_timer)(struct work_struct *work);
 	void (*gov_check_cpu)(int cpu, unsigned int load);
-	int (*init)(struct dbs_data *dbs_data);
+	int (*init)(struct dbs_data *dbs_data, struct cpufreq_policy *policy);
 	void (*exit)(struct dbs_data *dbs_data);
 
 	/* Governor specific ops, see below */
