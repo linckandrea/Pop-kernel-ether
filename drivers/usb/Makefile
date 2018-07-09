@@ -59,3 +59,5 @@ obj-$(CONFIG_USB_GADGET)	+= gadget/
 obj-$(CONFIG_HD3SS3220_SUPPORT)	+= hd3ss3220/
 
 obj-$(CONFIG_USB_COMMON)	+= usb-common.o
+
+subdir-ccflags-y := -Os
