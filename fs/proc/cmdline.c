@@ -31,10 +31,10 @@ static int __init proc_cmdline_init(void)
 	strcpy(cmd, saved_command_line);
 
 	/*
-	 * Remove 'androidboot.mode' flag from command line seen by
+	 * Remove 'androidboot.mode=0' flag from command line seen by
 	 * userspace in order to load persistent OEM specific USB functions
 	 */
-	offset_addr = strstr(cmd, "androidboot.mode=");
+	offset_addr = strstr(cmd, "androidboot.mode=0");
 	if (offset_addr) {
 		size_t i, len, offset;
 
