@@ -373,7 +373,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
                    -fgraphite-identity -floop-nest-optimize -fivopts \
                    -ftree-loop-distribution -ftree-loop-distribute-patterns -ftree-vectorize \
                    -fmodulo-sched -fmodulo-sched-allow-regmoves \
-                   -mcpu=cortex-a57.cortex-a53 -mtune=cortex-a57.cortex-a53 \
+                   -mcpu=cortex-a57.cortex-a53+crypto+crc -mtune=cortex-a57.cortex-a53 \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
