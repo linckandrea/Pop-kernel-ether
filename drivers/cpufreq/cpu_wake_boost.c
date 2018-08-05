@@ -13,7 +13,7 @@
 
 #include <linux/cpu.h>
 #include <linux/cpufreq.h>
-#include <linux/fb.h>
+#include <linux/state_notifier.h>
 #include <linux/slab.h>
 
 enum boost_state {
@@ -29,8 +29,8 @@ struct wake_boost_info {
 	struct workqueue_struct *wq;
 	struct work_struct boost_work;
 	struct delayed_work unboost_work;
+	struct notifier_block notif;
 	struct notifier_block cpu_notif;
-	struct notifier_block fb_notif;
 	enum boost_state state;
 };
 
@@ -89,22 +89,21 @@ static int do_cpu_boost(struct notifier_block *nb,
 	return NOTIFY_OK;
 }
 
-static int fb_notifier_callback(struct notifier_block *nb,
-		unsigned long action, void *data)
+static int state_notifier_callback(struct notifier_block *this,
+				unsigned long event, void *data)
 {
-	struct wake_boost_info *w = container_of(nb, typeof(*w), fb_notif);
-	struct fb_event *evdata = data;
-	int *blank = evdata->data;
+	struct wake_boost_info *w = container_of(this, typeof(*w), notif);
 
-	/* Parse framebuffer events as soon as they occur */
-	if (action != FB_EARLY_EVENT_BLANK)
-		return NOTIFY_OK;
-
-	if (*blank == FB_BLANK_UNBLANK) {
-		queue_work(w->wq, &w->boost_work);
-	} else {
-		if (cancel_delayed_work_sync(&w->unboost_work))
-			queue_delayed_work(w->wq, &w->unboost_work, 0);
+	switch (event) {
+		case STATE_NOTIFIER_ACTIVE:
+			queue_work(w->wq, &w->boost_work);
+			break;
+		case STATE_NOTIFIER_SUSPEND:
+			if (cancel_delayed_work_sync(&w->unboost_work))
+				queue_delayed_work(w->wq, &w->unboost_work, 0);
+			break;
+		default:
+			break;
 	}
 
 	return NOTIFY_OK;
@@ -130,9 +129,9 @@ static int __init cpu_wake_boost_init(void)
 	w->cpu_notif.notifier_call = do_cpu_boost;
 	cpufreq_register_notifier(&w->cpu_notif, CPUFREQ_POLICY_NOTIFIER);
 
-	w->fb_notif.notifier_call = fb_notifier_callback;
-	w->fb_notif.priority = INT_MAX;
-	fb_register_client(&w->fb_notif);
+	w->notif.notifier_call = state_notifier_callback;
+	w->notif.priority = INT_MAX;
+	state_register_client(&w->notif);
 
 	return 0;
 }
