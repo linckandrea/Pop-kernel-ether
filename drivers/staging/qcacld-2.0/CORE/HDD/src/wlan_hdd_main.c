@@ -10335,7 +10335,7 @@ static hdd_adapter_t* hdd_alloc_station_adapter(hdd_context_t *pHddCtx,
 
       vos_mem_copy(pWlanDev->dev_addr, (void *)macAddr, sizeof(tSirMacAddr));
       vos_mem_copy( pAdapter->macAddressCurrent.bytes, macAddr, sizeof(tSirMacAddr));
-      pWlanDev->watchdog_timeo = HDD_TX_TIMEOUT;
+      pWlanDev->watchdog_timeo = 0;
       /*
        * kernel will consume ethernet header length buffer for hard_header,
        * so just reserve it
