@@ -6816,7 +6816,7 @@ hdd_adapter_t* hdd_wlan_create_ap_dev(hdd_context_t *pHddCtx,
 
         hdd_set_ap_ops( pHostapdAdapter->dev );
 
-        pWlanHostapdDev->watchdog_timeo = HDD_TX_TIMEOUT;
+        pWlanHostapdDev->watchdog_timeo = 0;
         pWlanHostapdDev->mtu = HDD_DEFAULT_MTU;
         pWlanHostapdDev->tx_queue_len = HDD_NETDEV_TX_QUEUE_LEN;
 
