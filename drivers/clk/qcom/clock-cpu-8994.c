@@ -988,6 +988,8 @@ void sanity_check_clock_tree(u32 muxval, struct mux_clk *mux)
 		case AUX_CLK_SEL:
 			rate = sys_apcsaux_clk.c.rate;
 		break;
+		default:
+			return;
 		};
 	break;
 	case PLL0_EARLY_SEL:
@@ -998,6 +1000,8 @@ void sanity_check_clock_tree(u32 muxval, struct mux_clk *mux)
 		rate = readl_relaxed(base + C0_PLLA_L_VAL);
 		rate *= xo_ao.c.rate;
 	break;
+	default:
+		return;
 	};
 
 	/* One regulator */
@@ -1557,7 +1561,7 @@ static void populate_opp_table(struct platform_device *pdev)
 	struct platform_device *apc0_dev, *apc1_dev;
 	struct device_node *apc0_node, *apc1_node;
 	unsigned long apc0_fmax, apc1_fmax;
-	int cpu, a53_cpu, a57_cpu;
+        int cpu, a53_cpu = 0, a57_cpu = 0;
 
 	apc0_node = of_parse_phandle(pdev->dev.of_node, "vdd-a53-supply", 0);
 	apc1_node = of_parse_phandle(pdev->dev.of_node, "vdd-a57-supply", 0);
