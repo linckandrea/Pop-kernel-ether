@@ -382,16 +382,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
                    -fomit-frame-pointer \
                    -std=gnu89
 
-
-KBUILD_CFLAGS   += -Wno-trigraphs -Wno-unused-label -Wno-array-bounds -Wno-memset-transposed-args \
-                    -Wno-unused-function -Wno-declaration-after-statement \
-                    -Wno-unused-variable -Wno-parentheses -Wno-maybe-uninitialized \
-                    -Wno-misleading-indentation -Wno-bool-compare -Wno-int-conversion \
-                    -Wno-discarded-qualifiers -Wno-tautological-compare -Wno-incompatible-pointer-types \
-		    -Wno-error=maybe-uninitialized -Wno-bool-compare -Wno-misleading-indentation \
-	            -Wno-format -Wno-logical-not-parentheses -Wno-int-in-bool-context -Wno-memset-elt-size \
-                    -Wno-parentheses -Wno-bool-operation -Wno-duplicate-decl-specifier -Wno-stringop-overflow \
-                    -Wno-format-truncation -Wno-format-overflow -fno-modulo-sched \
+KBUILD_CFLAGS   += -Wno-misleading-indentation
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
