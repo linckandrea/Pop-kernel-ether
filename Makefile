@@ -382,7 +382,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
                    -fomit-frame-pointer \
                    -std=gnu89
 
-KBUILD_CFLAGS   += -Wno-misleading-indentation
+KBUILD_CFLAGS   += -Wno-misleading-indentation -Wno-error=packed-not-aligned
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
