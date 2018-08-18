@@ -379,7 +379,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 # TheCrazyLex@PA Optimize for Cortex-A53+Cortex-A57 combo
 KBUILD_CFLAGS	+= -mcpu=cortex-a57.cortex-a53
 
-KBUILD_CFLAGS   += -Wno-misleading-indentation -Wno-error=packed-not-aligned
+KBUILD_CFLAGS   += -Wno-misleading-indentation -Wno-error=packed-not-aligned -Wno-packed-not-aligned 
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
