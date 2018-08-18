@@ -3,7 +3,8 @@
  * Primarily based on Noop, deadline, and SIO IO schedulers.
  *
  * Copyright (C) 2012 Brandon Berhent <bbedward@gmail.com>
- *
+ *           (C) 2014 LoungeKatt <twistedumbrella@gmail.com>
+ *           (C) 2015 Matthew Alex <matthewalex@outlook.com> (Fixes to stop crashing on 3.10)
  * FCFS, dispatches are back-inserted, deadlines ensure fairness.
  * Should work best with devices where there is no travel delay.
  */
@@ -25,7 +26,7 @@ struct zen_data {
 	/* Requests are only present on fifo_list */
 	struct list_head fifo_list[2];
 
-        unsigned int batching;          /* number of sequential requests made */
+	unsigned int batching;		/* number of sequential requests made */
 
 	/* tunables */
 	int fifo_expire[2];
@@ -159,28 +160,29 @@ static int zen_dispatch_requests(struct request_queue *q, int force)
 static int zen_init_queue(struct request_queue *q, struct elevator_type *e)
 {
 	struct zen_data *zdata;
-	struct elevator_queue *eq;
+    struct elevator_queue *eq;
+    
+    eq = elevator_alloc(q, e);
+    if (!eq)
+        return -ENOMEM;
 
-	eq = elevator_alloc(q, e);
-	if (!eq)
-		return -ENOMEM;
-
-	zdata = kmalloc_node(sizeof(*zdata), GFP_KERNEL, q->node);
-	if (!zdata) {
-		kobject_put(&eq->kobj);
-		return -ENOMEM;
-	}
-	eq->elevator_data = zdata;
-
+    zdata = kmalloc_node(sizeof(*zdata), GFP_KERNEL, q->node);
+    if (!zdata) {
+        kobject_put(&eq->kobj);
+        return -ENOMEM;
+    }
+    eq->elevator_data = zdata;
+	
+ 
+    spin_lock_irq(q->queue_lock);
+	q->elevator = eq;
+	spin_unlock_irq(q->queue_lock);
+	
 	INIT_LIST_HEAD(&zdata->fifo_list[SYNC]);
 	INIT_LIST_HEAD(&zdata->fifo_list[ASYNC]);
 	zdata->fifo_expire[SYNC] = sync_expire;
 	zdata->fifo_expire[ASYNC] = async_expire;
 	zdata->fifo_batch = fifo_batch;
-
-	spin_lock_irq(q->queue_lock);
-	q->elevator = eq;
-	spin_unlock_irq(q->queue_lock);
 	return 0;
 }
 
