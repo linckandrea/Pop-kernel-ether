@@ -69,6 +69,7 @@ patches-*
 # quilt's files
 patches
 series
+script_per_compilazione -2.sh
 
 # cscope files
 cscope.*
