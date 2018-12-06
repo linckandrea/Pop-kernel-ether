@@ -374,7 +374,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -pipe \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
-		   -std=gnu89
+		   -std=gnu89 -fdiagnostics-color=always
 
 # TheCrazyLex@PA Optimize for Cortex-A53+Cortex-A57 combo
 KBUILD_CFLAGS	+= -mcpu=cortex-a57.cortex-a53
