@@ -10335,7 +10335,7 @@ static hdd_adapter_t* hdd_alloc_station_adapter(hdd_context_t *pHddCtx,
 
       vos_mem_copy(pWlanDev->dev_addr, (void *)macAddr, sizeof(tSirMacAddr));
       vos_mem_copy( pAdapter->macAddressCurrent.bytes, macAddr, sizeof(tSirMacAddr));
-      pWlanDev->watchdog_timeo = HDD_TX_TIMEOUT;
+      pWlanDev->watchdog_timeo = 0;
       /*
        * kernel will consume ethernet header length buffer for hard_header,
        * so just reserve it
@@ -10347,7 +10347,7 @@ static hdd_adapter_t* hdd_alloc_station_adapter(hdd_context_t *pHddCtx,
          pWlanDev->features |= NETIF_F_HW_CSUM;
       else if (pHddCtx->cfg_ini->enableTCPChkSumOffld)
          pWlanDev->features |= NETIF_F_IP_CSUM | NETIF_F_IPV6_CSUM;
-         pWlanDev->features |= NETIF_F_RXCSUM;
+      pWlanDev->features |= NETIF_F_RXCSUM;
       hdd_set_station_ops( pAdapter->dev );
 
       pWlanDev->destructor = free_netdev;
@@ -14638,8 +14638,8 @@ static void hdd_state_info_dump(char **buf_ptr, uint16_t *size)
 		if (adapter->dev)
 			len += scnprintf(buf + len, *size - len,
 				"\n device name: %s", adapter->dev->name);
-			len += scnprintf(buf + len, *size - len,
-				"\n device_mode: %d", adapter->device_mode);
+		len += scnprintf(buf + len, *size - len,
+			"\n device_mode: %d", adapter->device_mode);
 		switch (adapter->device_mode) {
 		case WLAN_HDD_INFRA_STATION:
 		case WLAN_HDD_P2P_CLIENT:
