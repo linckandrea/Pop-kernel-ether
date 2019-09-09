@@ -370,16 +370,12 @@ LINUXINCLUDE    := \
 KBUILD_CPPFLAGS := -D__KERNEL__
 
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
-                   -fgraphite-identity -floop-nest-optimize -fivopts \
-                   -ftree-loop-distribution -ftree-loop-distribute-patterns -ftree-vectorize \
-                   -fmodulo-sched -fmodulo-sched-allow-regmoves \
                    -mcpu=cortex-a57.cortex-a53 -mtune=cortex-a57.cortex-a53 \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
                    -g0 -DNDEBUG \
-                   -fomit-frame-pointer \
                    -std=gnu89
 
 KBUILD_AFLAGS_KERNEL :=
