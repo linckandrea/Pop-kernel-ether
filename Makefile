@@ -377,9 +377,6 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-delete-null-pointer-checks \
 		   -std=gnu89 -fdiagnostics-color=always
 
-# TheCrazyLex@PA Optimize for Cortex-A53+Cortex-A57 combo
-KBUILD_CFLAGS	+= -mcpu=cortex-a57.cortex-a53
-
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
@@ -583,6 +580,22 @@ KBUILD_CFLAGS	+= -Os
 else
 KBUILD_CFLAGS	+= -O2
 endif
+
+KBUILD_CFLAGS += $(call cc-disable-warning, format-truncation) \
+		 $(call cc-disable-warning, format-overflow) \
+		 $(call cc-disable-warning, int-in-bool-context) \
+		 $(call cc-disable-warning, address-of-packed-member) \
+		 $(call cc-disable-warning, attribute-alias) \
+		 $(call cc-disable-warning, address-of-packed-member) \
+		 $(call cc-disable-warning, psabi) \
+		 $(call cc-disable-warning, restrict) \
+		 $(call cc-disable-warning, stringop-overflow) \
+		 $(call cc-disable-warning, zero-length-bounds) \
+		 $(call cc-disable-warning, attribute-alias) \
+		 $(call cc-disable-warning, packed-not-aligned) \
+		 $(call cc-disable-warning, stringop-truncation) \
+		 $(call cc-disable-warning, maybe-uninitialized,) \
+		 $(call cc-disable-warning, unused-const-variable)
 
 include $(srctree)/arch/$(SRCARCH)/Makefile
 
