@@ -456,7 +456,6 @@ static void update_running_avg(bool trigger_update)
 	struct cpu_data *pcpu;
 	int avg, iowait_avg, big_avg, old_nrrun;
 	s64 now;
-	s64 elapsed;
 	unsigned long flags;
 
 	spin_lock_irqsave(&state_lock, flags);
@@ -582,7 +581,7 @@ static bool eval_need(struct cpu_data *f)
 	if (need_cpus > last_need) {
 		ret = 1;
 	} else if (need_cpus < last_need) {
-		elapsed = now - f->need_ts;
+		s64 elapsed = now - f->need_ts;
 		if (elapsed >= f->offline_delay_ms) {
 			ret = 1;
 		} else {
