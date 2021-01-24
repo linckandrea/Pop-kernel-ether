@@ -554,7 +554,6 @@ static bool eval_need(struct cpu_data *f)
 	int ret = 0;
 	bool need_flag = false;
 	s64 now;
-	s64 elapsed;
 
 	if (unlikely(!f->inited))
 		return 0;
